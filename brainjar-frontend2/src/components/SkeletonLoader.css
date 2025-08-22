@@ -1,0 +1,138 @@
+/* Skeleton Loader Styles */
+.dashboard-skeleton {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  min-height: calc(100vh - 70px);
+}
+
+.skeleton-header {
+  margin-bottom: 2rem;
+  padding: 2rem;
+  background: var(--card-bg);
+  border-radius: 1.5rem;
+  border: 1px solid var(--border);
+}
+
+.skeleton-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.skeleton-stat-card {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 1.5rem;
+  padding: 2rem;
+}
+
+.skeleton-stat-content {
+  flex: 1;
+}
+
+.skeleton-main {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+.skeleton-left,
+.skeleton-right {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.skeleton-section {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 1.5rem;
+  padding: 1.5rem;
+}
+
+.skeleton-badges-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1rem;
+}
+
+.skeleton-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+  background: var(--bg-secondary);
+  border-radius: 0.75rem;
+  border: 1px solid var(--border-light);
+}
+
+.skeleton-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.skeleton-leaderboard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.skeleton-leaderboard-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--bg-secondary);
+  border-radius: 1rem;
+  border: 1px solid var(--border-light);
+}
+
+.skeleton-leaderboard-content {
+  flex: 1;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .skeleton-main {
+    grid-template-columns: 1fr;
+  }
+  
+  .skeleton-stats {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-skeleton {
+    padding: 1rem;
+  }
+  
+  .skeleton-header {
+    padding: 1.5rem;
+  }
+  
+  .skeleton-stats {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .skeleton-section {
+    padding: 1rem;
+  }
+  
+  .skeleton-badges-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .skeleton-badges-grid {
+    grid-template-columns: 1fr;
+  }
+}

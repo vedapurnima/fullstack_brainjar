@@ -1,47 +1,68 @@
-/* StatCard Styles */
+/* Modern StatCard Styles */
 .stat-card {
   position: relative;
-  background: var(--card-bg);
+  background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 1.5rem;
-  padding: 2rem;
+  border-radius: var(--radius-3xl);
+  padding: var(--spacing-8);
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: var(--spacing-6);
   overflow: hidden;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: var(--shadow);
+  transition: var(--transition-all);
+  box-shadow: var(--shadow-sm);
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--bg-accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--transition-normal);
+}
+
+.stat-card:hover::before {
+  transform: scaleX(1);
 }
 
 .stat-card:hover {
-  transform: translateY(-8px);
-  box-shadow: var(--shadow-lg);
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-xl);
+  border-color: var(--border-focus);
+  background: var(--surface-accent);
 }
 
 .stat-icon {
   width: 4rem;
   height: 4rem;
-  border-radius: 1rem;
+  border-radius: var(--radius-2xl);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: var(--text-inverse);
   font-size: 1.5rem;
   z-index: 2;
   position: relative;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-md);
 }
 
 .stat-card-primary .stat-icon {
-  background: var(--gradient-primary);
+  background: var(--bg-accent);
 }
 
 .stat-card-secondary .stat-icon {
-  background: var(--gradient-secondary);
+  background: linear-gradient(135deg, var(--secondary), var(--accent));
 }
 
 .stat-card-accent .stat-icon {
-  background: var(--gradient-accent);
+  background: linear-gradient(135deg, var(--accent), var(--info));
 }
 
 .stat-content {
@@ -50,18 +71,22 @@
 }
 
 .stat-value {
-  font-size: 2.5rem;
-  font-weight: 700;
+  font-size: var(--text-4xl);
+  font-weight: var(--font-weight-extrabold);
   color: var(--text-primary);
   margin: 0;
   line-height: 1;
+  background: var(--bg-accent);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .stat-title {
-  font-size: 1rem;
+  font-size: var(--text-base);
   color: var(--text-secondary);
-  margin: 0.5rem 0 0 0;
-  font-weight: 500;
+  margin: var(--spacing-2) 0 0 0;
+  font-weight: var(--font-weight-semibold);
 }
 
 .stat-background {
@@ -71,7 +96,8 @@
   width: 100%;
   height: 100%;
   overflow: hidden;
-  opacity: 0.1;
+  opacity: 0.03;
+  transition: opacity var(--transition-normal);
 }
 
 .stat-gradient {
@@ -81,45 +107,48 @@
   width: 200%;
   height: 200%;
   border-radius: 50%;
-  transition: all 0.3s ease;
+  transition: var(--transition-all);
 }
 
 .stat-card-primary .stat-gradient {
-  background: var(--gradient-primary);
+  background: var(--bg-accent);
 }
 
 .stat-card-secondary .stat-gradient {
-  background: var(--gradient-secondary);
+  background: linear-gradient(135deg, var(--secondary), var(--accent));
 }
 
 .stat-card-accent .stat-gradient {
-  background: var(--gradient-accent);
+  background: linear-gradient(135deg, var(--accent), var(--info));
+}
+
+.stat-card:hover .stat-background {
+  opacity: 0.08;
 }
 
 .stat-card:hover .stat-gradient {
-  opacity: 0.2;
-  transform: scale(1.1);
+  transform: scale(1.2);
 }
 
 /* Responsive */
 @media (max-width: 768px) {
   .stat-card {
-    padding: 1.5rem;
-    gap: 1rem;
+    padding: var(--spacing-6);
+    gap: var(--spacing-4);
   }
   
   .stat-icon {
-    width: 3rem;
-    height: 3rem;
+    width: 3.5rem;
+    height: 3.5rem;
     font-size: 1.25rem;
   }
   
   .stat-value {
-    font-size: 2rem;
+    font-size: var(--text-3xl);
   }
   
   .stat-title {
-    font-size: 0.9rem;
+    font-size: var(--text-sm);
   }
 }
 
@@ -127,10 +156,17 @@
   .stat-card {
     flex-direction: column;
     text-align: center;
-    padding: 1.25rem;
+    padding: var(--spacing-5);
+    gap: var(--spacing-3);
+  }
+  
+  .stat-icon {
+    width: 3rem;
+    height: 3rem;
+    font-size: 1.125rem;
   }
   
   .stat-value {
-    font-size: 1.75rem;
+    font-size: var(--text-2xl);
   }
 }

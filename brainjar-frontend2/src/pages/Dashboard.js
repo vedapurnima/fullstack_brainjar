@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
-  Trophy, 
-  Target, 
-  Flame, 
-  Users, 
-  BookOpen,
-  Filter,
-  Award,
-  Zap,
-  Star,
-  TrendingUp,
-  Clock
-} from 'lucide-react';
+  HiTrophy as Trophy,
+  HiFlag as Target,
+  HiFire as Flame,
+  HiUsers as Users,
+  HiBookOpen as BookOpen,
+  HiAdjustmentsHorizontal as Filter,
+  HiCheckBadge as Award,
+  HiBolt as Zap,
+  HiArrowTrendingUp as TrendingUp,
+  HiClock as Clock,
+  HiOutlineStar as Star
+} from 'react-icons/hi2';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import StatCard from '../components/StatCard';

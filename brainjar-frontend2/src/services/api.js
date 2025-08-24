@@ -22,9 +22,18 @@ apiInstance.interceptors.request.use((config) => {
 apiInstance.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Only redirect on 401 if we're not already on the login page
+    // and it's not a login/register request
     if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      window.location.href = '/login';
+      const currentPath = window.location.pathname;
+      const isAuthRequest = error.config?.url?.includes('/auth/');
+      
+      if (!isAuthRequest && currentPath !== '/login' && currentPath !== '/register') {
+        console.log('Unauthorized access, redirecting to login...');
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }

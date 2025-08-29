@@ -11,7 +11,8 @@ import {
   HiBolt as Zap,
   HiArrowTrendingUp as TrendingUp,
   HiClock as Clock,
-  HiOutlineStar as Star
+  HiOutlineStar as Star,
+  HiChatBubbleLeftRight as Chat
 } from 'react-icons/hi2';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
@@ -20,9 +21,14 @@ import Leaderboard from '../components/Leaderboard';
 import BadgeDisplay from '../components/BadgeDisplay';
 import ProblemFilters from '../components/ProblemFilters';
 import FriendSuggestions from '../components/FriendSuggestions';
+import FriendRecommendations from '../components/FriendRecommendations';
+import FriendsList from '../components/FriendsList';
+import ProblemsSolved from '../components/ProblemsSolved';
+import StreakTracker from '../components/StreakTracker';
+import ChatInterface from '../components/ChatInterface';
 import SkeletonLoader from '../components/SkeletonLoader';
 import ResourceModal from '../components/ResourceModal';
-import './Dashboard.css';
+import './Dashboard_Modern.css';
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -41,6 +47,14 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [showResourceModal, setShowResourceModal] = useState(false);
   const [selectedProblem, setSelectedProblem] = useState(null);
+  
+  // New modal states
+  const [showFriendRecommendations, setShowFriendRecommendations] = useState(false);
+  const [showFriendsList, setShowFriendsList] = useState(false);
+  const [showProblemsSolved, setShowProblemsSolved] = useState(false);
+  const [showStreakTracker, setShowStreakTracker] = useState(false);
+  const [showChatInterface, setShowChatInterface] = useState(false);
+  const [chatInitialUser, setChatInitialUser] = useState(null);
   
   // Badges based on problems solved
   const badges = [
@@ -63,56 +77,69 @@ const Dashboard = () => {
       
       // Parallel API calls for better performance
       const [problemsRes, friendsRes, streaksRes] = await Promise.allSettled([
-        api.get('/problems'),
-        api.get('/friends'),
-        api.get('/streaks')
+        api.get('/problems').catch(() => ({ data: [] })),
+        api.get('/friends').catch(() => ({ data: [] })),
+        api.get('/streaks').catch(() => ({ data: [] }))
       ]);
 
       // Handle problems data
-      if (problemsRes.status === 'fulfilled') {
-        const problemsData = problemsRes.value.data || [];
-        setProblems(problemsData);
-      }
+      const problemsData = problemsRes.status === 'fulfilled' ? problemsRes.value.data : [];
+      setProblems(problemsData);
 
-      // Handle friends data
-      if (friendsRes.status === 'fulfilled') {
-        const friendsData = friendsRes.value.data || [];
-        setFriends(friendsData);
-        
-        // Create mock leaderboard from friends data
-        const leaderboardData = friendsData.slice(0, 10).map((friend, index) => ({
+      // Handle friends data  
+      const friendsData = friendsRes.status === 'fulfilled' ? friendsRes.value.data : [];
+      setFriends(friendsData);
+      
+      // Create mock leaderboard from friends data or generate mock data
+      let leaderboardData = [];
+      if (friendsData.length > 0) {
+        leaderboardData = friendsData.slice(0, 10).map((friend, index) => ({
           id: friend.id,
           username: friend.name || friend.username,
           problems_solved: Math.floor(Math.random() * 100) + 10,
           streak: Math.floor(Math.random() * 30) + 1,
           rank: index + 1
         }));
-        setLeaderboard(leaderboardData);
+      } else {
+        // Generate mock leaderboard data
+        leaderboardData = [
+          { id: 1, username: 'CodeMaster', problems_solved: 150, streak: 25, rank: 1 },
+          { id: 2, username: 'AlgoWiz', problems_solved: 142, streak: 18, rank: 2 },
+          { id: 3, username: 'DataNinja', problems_solved: 138, streak: 22, rank: 3 },
+          { id: 4, username: 'LogicLord', problems_solved: 125, streak: 15, rank: 4 },
+          { id: 5, username: 'CodeCrafter', problems_solved: 118, streak: 12, rank: 5 }
+        ];
       }
+      setLeaderboard(leaderboardData);
 
       // Handle streaks data
-      if (streaksRes.status === 'fulfilled') {
-        const streaksData = streaksRes.value.data || [];
-        const currentStreak = streaksData.length > 0 ? streaksData[0].count : 0;
-        
-        setStats(prevStats => ({
-          ...prevStats,
-          problemsSolved: problems.length || Math.floor(Math.random() * 50),
-          currentStreak: currentStreak,
-          friends: friends.length || Math.floor(Math.random() * 20),
-          totalPoints: (problems.length || 0) * 10 + currentStreak * 5
-        }));
-      }
+      const streaksData = streaksRes.status === 'fulfilled' ? streaksRes.value.data : [];
+      const currentStreak = streaksData.length > 0 ? streaksData[0].count : Math.floor(Math.random() * 15) + 1;
+      
+      setStats({
+        problemsSolved: problemsData.length || Math.floor(Math.random() * 50) + 5,
+        currentStreak: currentStreak,
+        friends: friendsData.length || Math.floor(Math.random() * 20) + 3,
+        totalPoints: ((problemsData.length || 15) * 10) + (currentStreak * 5)
+      });
 
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
-      // Set mock data on error
+      // Set comprehensive mock data on error
       setStats({
         problemsSolved: 23,
         currentStreak: 7,
         friends: 12,
         totalPoints: 275
       });
+      
+      setLeaderboard([
+        { id: 1, username: 'CodeMaster', problems_solved: 150, streak: 25, rank: 1 },
+        { id: 2, username: 'AlgoWiz', problems_solved: 142, streak: 18, rank: 2 },
+        { id: 3, username: 'DataNinja', problems_solved: 138, streak: 22, rank: 3 },
+        { id: 4, username: 'LogicLord', problems_solved: 125, streak: 15, rank: 4 },
+        { id: 5, username: 'CodeCrafter', problems_solved: 118, streak: 12, rank: 5 }
+      ]);
     } finally {
       setLoading(false);
     }
@@ -126,6 +153,15 @@ const Dashboard = () => {
   const openResourceModal = (problem) => {
     setSelectedProblem(problem);
     setShowResourceModal(true);
+  };
+
+  const handleStartChat = (userId, username) => {
+    // Set the initial user for the chat
+    setChatInitialUser({ userId, username });
+    // Open the chat interface
+    setShowChatInterface(true);
+    // Show a toast to confirm the action
+    toast.success(`Opening chat with ${username}`);
   };
 
   const containerVariants = {
@@ -176,143 +212,209 @@ const Dashboard = () => {
         </div>
       </motion.div>
 
-      {/* Stats Grid */}
-      <motion.div className="stats-section" variants={itemVariants}>
-        <div className="stats-grid">
-          <StatCard
-            title="Problems Solved"
-            value={stats.problemsSolved}
-            icon={<Trophy size={24} />}
-            gradient="primary"
-            delay={0.1}
-          />
-          <StatCard
-            title="Current Streak"
-            value={stats.currentStreak}
-            icon={<Flame size={24} />}
-            gradient="accent"
-            delay={0.2}
-          />
-          <StatCard
-            title="Friends"
-            value={stats.friends}
-            icon={<Users size={24} />}
-            gradient="secondary"
-            delay={0.3}
-          />
-          <StatCard
-            title="Total Points"
-            value={stats.totalPoints}
-            icon={<Star size={24} />}
-            gradient="primary"
-            delay={0.4}
-          />
-        </div>
-      </motion.div>
-
-      {/* Main Content Grid */}
-      <div className="dashboard-main">
-        {/* Left Column */}
-        <div className="dashboard-left">
-          {/* Badges Section */}
-          <motion.div className="section-card" variants={itemVariants}>
-            <div className="section-header">
-              <h2><Award size={20} />Achievements</h2>
+      {/* Enhanced Card Grid Layout */}
+      <div className="dashboard-grid">
+        {/* Top Row - Quick Stats */}
+        <motion.div className="stat-card-container" variants={itemVariants}>
+          <div className="stat-cards-row">
+            <div className="stat-card primary">
+              <div className="stat-icon">
+                <Trophy size={28} />
+              </div>
+              <div className="stat-content">
+                <h3>Problems Solved</h3>
+                <p className="stat-number">{stats.problemsSolved}</p>
+                <span className="stat-label">Total completed</span>
+              </div>
             </div>
-            <BadgeDisplay 
-              badges={badges} 
-              problemsSolved={stats.problemsSolved}
-            />
+            
+            <div className="stat-card accent">
+              <div className="stat-icon">
+                <Flame size={28} />
+              </div>
+              <div className="stat-content">
+                <h3>Current Streak</h3>
+                <p className="stat-number">{stats.currentStreak}</p>
+                <span className="stat-label">Days in a row</span>
+              </div>
+            </div>
+            
+            <div className="stat-card secondary">
+              <div className="stat-icon">
+                <Users size={28} />
+              </div>
+              <div className="stat-content">
+                <h3>Friends</h3>
+                <p className="stat-number">{stats.friends}</p>
+                <span className="stat-label">Connected coders</span>
+              </div>
+            </div>
+            
+            <div className="stat-card success">
+              <div className="stat-icon">
+                <Star size={28} />
+              </div>
+              <div className="stat-content">
+                <h3>Total Points</h3>
+                <p className="stat-number">{stats.totalPoints}</p>
+                <span className="stat-label">Achievement points</span>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Main Content Grid */}
+        <div className="main-content-grid">
+          {/* Large Card - Leaderboard */}
+          <motion.div className="large-card leaderboard-card" variants={itemVariants}>
+            <div className="card-header">
+              <div className="card-title">
+                <TrendingUp size={24} />
+                <h3>Leaderboard</h3>
+              </div>
+              <span className="card-badge">Top 10</span>
+            </div>
+            <div className="card-content">
+              <Leaderboard data={leaderboard} currentUser={user?.username} />
+            </div>
           </motion.div>
 
-          {/* Quick Actions */}
-          <motion.div className="section-card" variants={itemVariants}>
-            <div className="section-header">
-              <h2><Zap size={20} />Quick Actions</h2>
+          {/* Quick Actions Card */}
+          <motion.div className="medium-card actions-card" variants={itemVariants}>
+            <div className="card-header">
+              <div className="card-title">
+                <Zap size={24} />
+                <h3>Quick Actions</h3>
+              </div>
             </div>
-            <div className="quick-actions">
+            <div className="card-content">
+              <div className="action-grid">
+                <button 
+                  className="action-button primary"
+                  onClick={() => openResourceModal({ title: 'General Resources' })}
+                >
+                  <BookOpen size={20} />
+                  <span>Browse Resources</span>
+                </button>
+                <button 
+                  className="action-button secondary"
+                  onClick={() => setShowProblemsSolved(true)}
+                >
+                  <Target size={20} />
+                  <span>View Solved</span>
+                </button>
+                <button 
+                  className="action-button accent"
+                  onClick={() => setShowFriendRecommendations(true)}
+                >
+                  <Users size={20} />
+                  <span>Find Friends</span>
+                </button>
+                <button 
+                  className="action-button chat"
+                  onClick={() => setShowChatInterface(true)}
+                >
+                  <Chat size={20} />
+                  <span>Open Chat</span>
+                </button>
+                <button 
+                  className="action-button success"
+                  onClick={() => setShowStreakTracker(true)}
+                >
+                  <Flame size={20} />
+                  <span>Track Streak</span>
+                </button>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Achievements Card */}
+          <motion.div className="medium-card achievements-card" variants={itemVariants}>
+            <div className="card-header">
+              <div className="card-title">
+                <Award size={24} />
+                <h3>Achievements</h3>
+              </div>
+              <span className="card-badge">Latest</span>
+            </div>
+            <div className="card-content">
+              <BadgeDisplay 
+                badges={badges} 
+                problemsSolved={stats.problemsSolved}
+              />
+            </div>
+          </motion.div>
+
+          {/* Friends Card */}
+          <motion.div className="medium-card friends-card" variants={itemVariants}>
+            <div className="card-header">
+              <div className="card-title">
+                <Users size={24} />
+                <h3>Friends</h3>
+              </div>
               <button 
-                className="action-btn primary"
-                onClick={() => openResourceModal({ title: 'General Resources' })}
+                className="card-action-btn"
+                onClick={() => setShowFriendsList(true)}
               >
-                <BookOpen size={18} />
-                Browse Resources
-              </button>
-              <button className="action-btn secondary">
-                <Target size={18} />
-                Practice Problems
-              </button>
-              <button className="action-btn secondary">
-                <Users size={18} />
-                Find Friends
+                View All
               </button>
             </div>
+            <div className="card-content">
+              <FriendSuggestions 
+                friends={friends} 
+                onMessageClick={handleStartChat}
+              />
+            </div>
           </motion.div>
 
-          {/* Friend Suggestions */}
-          <motion.div className="section-card" variants={itemVariants}>
-            <div className="section-header">
-              <h2><Users size={20} />Friend Suggestions</h2>
+          {/* Activity Card */}
+          <motion.div className="wide-card activity-card" variants={itemVariants}>
+            <div className="card-header">
+              <div className="card-title">
+                <Clock size={24} />
+                <h3>Recent Activity</h3>
+              </div>
             </div>
-            <FriendSuggestions friends={friends} />
-          </motion.div>
-        </div>
-
-        {/* Right Column */}
-        <div className="dashboard-right">
-          {/* Leaderboard */}
-          <motion.div className="section-card" variants={itemVariants}>
-            <div className="section-header">
-              <h2><TrendingUp size={20} />Leaderboard</h2>
-              <span className="section-badge">Top 10</span>
-            </div>
-            <Leaderboard data={leaderboard} currentUser={user?.username} />
-          </motion.div>
-
-          {/* Problem Filters */}
-          <motion.div className="section-card" variants={itemVariants}>
-            <div className="section-header">
-              <h2><Filter size={20} />Filter Problems</h2>
-            </div>
-            <ProblemFilters 
-              problems={problems}
-              onFilter={handleProblemFilter}
-            />
-          </motion.div>
-
-          {/* Recent Activity */}
-          <motion.div className="section-card" variants={itemVariants}>
-            <div className="section-header">
-              <h2><Clock size={20} />Recent Activity</h2>
-            </div>
-            <div className="activity-list">
-              <div className="activity-item">
-                <div className="activity-icon success">
-                  <Trophy size={16} />
+            <div className="card-content">
+              <div className="activity-timeline">
+                <div className="activity-item">
+                  <div className="activity-dot success"></div>
+                  <div className="activity-details">
+                    <p>Solved "Two Sum" problem</p>
+                    <span className="activity-time">2 hours ago</span>
+                  </div>
                 </div>
-                <div className="activity-content">
-                  <p>Solved "Two Sum" problem</p>
-                  <span className="activity-time">2 hours ago</span>
+                <div className="activity-item">
+                  <div className="activity-dot primary"></div>
+                  <div className="activity-details">
+                    <p>Added a new friend</p>
+                    <span className="activity-time">1 day ago</span>
+                  </div>
+                </div>
+                <div className="activity-item">
+                  <div className="activity-dot accent"></div>
+                  <div className="activity-details">
+                    <p>Achieved 7-day streak</p>
+                    <span className="activity-time">2 days ago</span>
+                  </div>
                 </div>
               </div>
-              <div className="activity-item">
-                <div className="activity-icon primary">
-                  <Users size={16} />
-                </div>
-                <div className="activity-content">
-                  <p>Added a new friend</p>
-                  <span className="activity-time">1 day ago</span>
-                </div>
+            </div>
+          </motion.div>
+
+          {/* Problem Filters Card */}
+          <motion.div className="small-card filters-card" variants={itemVariants}>
+            <div className="card-header">
+              <div className="card-title">
+                <Filter size={24} />
+                <h3>Problem Filters</h3>
               </div>
-              <div className="activity-item">
-                <div className="activity-icon accent">
-                  <Flame size={16} />
-                </div>
-                <div className="activity-content">
-                  <p>Maintained 7-day streak</p>
-                  <span className="activity-time">3 days ago</span>
-                </div>
-              </div>
+            </div>
+            <div className="card-content">
+              <ProblemFilters 
+                problems={problems}
+                onFilter={handleProblemFilter}
+              />
             </div>
           </motion.div>
         </div>
@@ -323,6 +425,37 @@ const Dashboard = () => {
         isOpen={showResourceModal}
         onClose={() => setShowResourceModal(false)}
         problem={selectedProblem}
+      />
+
+      {/* New Feature Modals */}
+      <FriendRecommendations
+        isOpen={showFriendRecommendations}
+        onClose={() => setShowFriendRecommendations(false)}
+      />
+      
+      <FriendsList
+        isOpen={showFriendsList}
+        onClose={() => setShowFriendsList(false)}
+      />
+      
+      <ProblemsSolved
+        isOpen={showProblemsSolved}
+        onClose={() => setShowProblemsSolved(false)}
+      />
+      
+      <StreakTracker
+        isOpen={showStreakTracker}
+        onClose={() => setShowStreakTracker(false)}
+      />
+      
+      <ChatInterface
+        isOpen={showChatInterface}
+        onClose={() => {
+          setShowChatInterface(false);
+          setChatInitialUser(null);
+        }}
+        initialUserId={chatInitialUser?.userId}
+        initialUsername={chatInitialUser?.username}
       />
     </motion.div>
   );

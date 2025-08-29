@@ -22,8 +22,7 @@ const problemService = {
   // Get all problems for the authenticated user
   getProblems: async () => {
     try {
-      const user = getCurrentUser();
-      const response = await api.get(`/problems?user_id=${user.id}`);
+      const response = await api.get('/api/problems');
       return Array.isArray(response.data) ? response.data : [];
     } catch (error) {
       console.error('Error fetching problems:', error);
@@ -34,9 +33,7 @@ const problemService = {
   // Get all problems from all users (global view)
   getAllProblems: async () => {
     try {
-      // For now, we'll use the same endpoint but later this could be different
-      // If backend supports a global problems endpoint, change this
-      const response = await api.get('/problems');
+      const response = await api.get('/api/problems');
       return Array.isArray(response.data) ? response.data : [];
     } catch (error) {
       console.error('Error fetching all problems:', error);
@@ -47,8 +44,7 @@ const problemService = {
   // Get a specific problem by ID
   getProblem: async (problemId) => {
     try {
-      const user = getCurrentUser();
-      const response = await api.get(`/problems/${problemId}?user_id=${user.id}`);
+      const response = await api.get(`/api/problems/${problemId}`);
       return response.data;
     } catch (error) {
       console.error('Error fetching problem:', error);
@@ -59,8 +55,7 @@ const problemService = {
   // Create a new problem
   createProblem: async (problemData) => {
     try {
-      const user = getCurrentUser();
-      const response = await api.post(`/problems?user_id=${user.id}`, problemData);
+      const response = await api.post('/api/problems', problemData);
       return response.data;
     } catch (error) {
       console.error('Error creating problem:', error);
@@ -71,8 +66,7 @@ const problemService = {
   // Update an existing problem
   updateProblem: async (problemId, problemData) => {
     try {
-      const user = getCurrentUser();
-      const response = await api.put(`/problems/${problemId}?user_id=${user.id}`, problemData);
+      const response = await api.put(`/api/problems/${problemId}`, problemData);
       return response.data;
     } catch (error) {
       console.error('Error updating problem:', error);
@@ -83,8 +77,7 @@ const problemService = {
   // Delete a problem
   deleteProblem: async (problemId) => {
     try {
-      const user = getCurrentUser();
-      await api.delete(`/problems/${problemId}?user_id=${user.id}`);
+      await api.delete(`/api/problems/${problemId}`);
       return true;
     } catch (error) {
       console.error('Error deleting problem:', error);
@@ -95,7 +88,7 @@ const problemService = {
   // Submit a solution to a problem
   submitSolution: async (problemId, solution) => {
     try {
-      const response = await api.post(`/problems/${problemId}/solve`, {
+      const response = await api.post(`/api/problems/${problemId}/solve`, {
         solution: solution,
         submitted_at: new Date().toISOString()
       });
@@ -106,10 +99,23 @@ const problemService = {
     }
   },
 
+  // Mark problem as solved
+  markProblemSolved: async (problemId) => {
+    try {
+      const response = await api.post(`/api/streaks/update-for-problem`, {
+        problem_id: problemId
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error marking problem as solved:', error);
+      throw error;
+    }
+  },
+
   // Get solutions for a problem
   getProblemSolutions: async (problemId) => {
     try {
-      const response = await api.get(`/problems/${problemId}/solutions`);
+      const response = await api.get(`/api/problems/${problemId}/solutions`);
       return Array.isArray(response.data) ? response.data : [];
     } catch (error) {
       console.error('Error fetching solutions:', error);
@@ -120,7 +126,7 @@ const problemService = {
   // Submit feedback/rating for a problem
   submitFeedback: async (problemId, feedbackData) => {
     try {
-      const response = await api.post(`/problems/${problemId}/feedback`, {
+      const response = await api.post(`/api/problems/${problemId}/feedback`, {
         rating: feedbackData.rating,
         comment: feedbackData.comment || '',
         submitted_at: new Date().toISOString()
@@ -135,7 +141,7 @@ const problemService = {
   // Get feedback for a problem
   getProblemFeedback: async (problemId) => {
     try {
-      const response = await api.get(`/problems/${problemId}/feedback`);
+      const response = await api.get(`/api/problems/${problemId}/feedback`);
       return Array.isArray(response.data) ? response.data : [];
     } catch (error) {
       console.error('Error fetching feedback:', error);
@@ -146,7 +152,7 @@ const problemService = {
   // Get user's own solutions
   getUserSolutions: async () => {
     try {
-      const response = await api.get('/solutions/my');
+      const response = await api.get('/api/solutions/my');
       return Array.isArray(response.data) ? response.data : [];
     } catch (error) {
       console.error('Error fetching user solutions:', error);

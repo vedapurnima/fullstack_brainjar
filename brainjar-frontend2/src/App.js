@@ -5,6 +5,9 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import Navbar from './components/Navbar';
 import Chatbot from './components/Chatbot';
+import Friends from './components/Friends';
+import Chat from './components/Chat';
+import EnhancedProblems from './components/EnhancedProblems';
 import Profile from './pages/Profile';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -68,6 +71,9 @@ const AppRoutes = () => {
       <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
       <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
       <Route path="/problems" element={<PrivateRoute><Problems /></PrivateRoute>} />
+      <Route path="/enhanced-problems" element={<PrivateRoute><EnhancedProblems /></PrivateRoute>} />
+      <Route path="/friends" element={<PrivateRoute><Friends /></PrivateRoute>} />
+      <Route path="/chat" element={<PrivateRoute><Chat /></PrivateRoute>} />
       <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
       <Route path="/profile/:userId" element={<PrivateRoute><Profile /></PrivateRoute>} />
       <Route path="/" element={<Navigate to="/dashboard" replace />} />

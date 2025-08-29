@@ -11,10 +11,19 @@ import {
   FiCheck,
   FiX
 } from 'react-icons/fi';
-import { RiRobot2Line, RiWizardLine, RiNinjaMaskLine, RiAncientGateLine, RiSpaceShipLine, RiFlowerLine } from 'react-icons/ri';
+import { 
+  RiSwordLine, 
+  RiUserAddLine, 
+  RiStarLine, 
+  RiRobotLine,
+  RiMagicLine,
+  RiAncientGateLine,
+  RiRocketLine,
+  RiFlowerLine
+} from 'react-icons/ri';
 import './FriendRecommendations.css';
 
-const FriendRecommendations = ({ onClose }) => {
+const FriendRecommendations = ({ isOpen, onClose }) => {
   const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -23,11 +32,11 @@ const FriendRecommendations = ({ onClose }) => {
 
   // Avatar mapping for character display
   const avatarIcons = {
-    'cyber-warrior': RiRobot2Line,
-    'code-wizard': RiWizardLine,
-    'debug-ninja': RiNinjaMaskLine,
+    'cyber-warrior': RiRobotLine,
+    'code-wizard': RiMagicLine,
+    'debug-ninja': RiSwordLine,
     'data-sage': RiAncientGateLine,
-    'logic-explorer': RiSpaceShipLine,
+    'logic-explorer': RiRocketLine,
     'pattern-botanist': RiFlowerLine
   };
 
@@ -41,23 +50,81 @@ const FriendRecommendations = ({ onClose }) => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:8080/friends/suggestions', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      
+      // Try the new recommendations endpoint first, fallback to suggestions
+      let response;
+      try {
+        response = await fetch('http://localhost:8080/friends/recommendations', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+      } catch (err) {
+        // Fallback to suggestions endpoint
+        response = await fetch('http://localhost:8080/friends/suggestions', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+      }
 
       if (!response.ok) {
-        throw new Error('Failed to fetch recommendations');
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 
       const data = await response.json();
       setRecommendations(data);
+      
+      if (data.length === 0) {
+        setError('No friend recommendations found. Try connecting with other users!');
+      }
     } catch (err) {
-      setError('Failed to load friend recommendations. Please try again.');
       console.error('Friend recommendations error:', err);
+      
+      // Provide mock data when API fails
+      const mockRecommendations = [
+        {
+          user: {
+            id: '1',
+            username: 'CodeMaster2024',
+            email: 'codemaster@example.com',
+            problems_solved: 85,
+            current_streak: 12
+          },
+          character: {
+            name: 'The Algorithm Sage',
+            avatar: 'cyber-warrior',
+            bio: 'Passionate about clean code and efficient algorithms',
+            personality_traits: ['analytical', 'persistent', 'creative']
+          },
+          compatibility_score: 92,
+          reason: 'Shared interest in algorithms and problem-solving'
+        },
+        {
+          user: {
+            id: '2', 
+            username: 'DataWizard',
+            email: 'datawiz@example.com',
+            problems_solved: 67,
+            current_streak: 8
+          },
+          character: {
+            name: 'Pattern Explorer',
+            avatar: 'code-wizard',
+            bio: 'Love finding patterns in data and code',
+            personality_traits: ['curious', 'methodical', 'innovative']
+          },
+          compatibility_score: 78,
+          reason: 'Similar problem-solving approach'
+        }
+      ];
+      
+      setRecommendations(mockRecommendations);
+      setError('Using demo data - connect to backend for live recommendations');
     } finally {
       setLoading(false);
     }
@@ -118,7 +185,7 @@ const FriendRecommendations = ({ onClose }) => {
   };
 
   const getAvatarIcon = (avatarId) => {
-    return avatarIcons[avatarId] || RiRobot2Line;
+    return avatarIcons[avatarId] || RiRobotLine;
   };
 
   if (loading) {
@@ -157,9 +224,18 @@ const FriendRecommendations = ({ onClose }) => {
     );
   }
 
+  if (!isOpen) return null;
+
   return (
-    <div className="friend-recommendations">
-      <div className="recommendations-container">
+    <AnimatePresence>
+      <motion.div 
+        className="friend-recommendations"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <div className="recommendations-container">
         <motion.div 
           className="header"
           initial={{ opacity: 0, y: -20 }}
@@ -323,8 +399,9 @@ const FriendRecommendations = ({ onClose }) => {
             </AnimatePresence>
           </div>
         )}
-      </div>
-    </div>
+        </div>
+      </motion.div>
+    </AnimatePresence>
   );
 };
 

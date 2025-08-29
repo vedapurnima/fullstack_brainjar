@@ -10,7 +10,9 @@ import {
   HiOutlineCpuChip,
   HiOutlineBars3,
   HiOutlineXMark,
-  HiOutlineSparkles
+  HiOutlineSparkles,
+  HiOutlineUserGroup,
+  HiOutlineChatBubbleLeftRight
 } from 'react-icons/hi2';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -57,11 +59,25 @@ const Navbar = () => {
             <span>Dashboard</span>
           </NavLink>
           <NavLink 
-            to="/problems" 
+            to="/enhanced-problems" 
             className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
           >
             <HiOutlinePuzzlePiece className="nav-icon" />
             <span>Problems</span>
+          </NavLink>
+          <NavLink 
+            to="/friends" 
+            className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+          >
+            <HiOutlineUserGroup className="nav-icon" />
+            <span>Friends</span>
+          </NavLink>
+          <NavLink 
+            to="/chat" 
+            className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+          >
+            <HiOutlineChatBubbleLeftRight className="nav-icon" />
+            <span>Chat</span>
           </NavLink>
         </div>
         
@@ -132,12 +148,28 @@ const Navbar = () => {
               <span>Dashboard</span>
             </NavLink>
             <NavLink 
-              to="/problems" 
+              to="/enhanced-problems" 
               className={({ isActive }) => `mobile-nav-link ${isActive ? 'active' : ''}`}
               onClick={closeMobileMenu}
             >
               <HiOutlinePuzzlePiece className="mobile-nav-icon" />
               <span>Problems</span>
+            </NavLink>
+            <NavLink 
+              to="/friends" 
+              className={({ isActive }) => `mobile-nav-link ${isActive ? 'active' : ''}`}
+              onClick={closeMobileMenu}
+            >
+              <HiOutlineUserGroup className="mobile-nav-icon" />
+              <span>Friends</span>
+            </NavLink>
+            <NavLink 
+              to="/chat" 
+              className={({ isActive }) => `mobile-nav-link ${isActive ? 'active' : ''}`}
+              onClick={closeMobileMenu}
+            >
+              <HiOutlineChatBubbleLeftRight className="mobile-nav-icon" />
+              <span>Chat</span>
             </NavLink>
             <NavLink 
               to="/profile" 

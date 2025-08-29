@@ -22,6 +22,14 @@ apiInstance.interceptors.request.use((config) => {
 apiInstance.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Log error details for debugging
+    console.error('API Error:', {
+      url: error.config?.url,
+      method: error.config?.method,
+      status: error.response?.status,
+      message: error.message
+    });
+
     // Only redirect on 401 if we're not already on the login page
     // and it's not a login/register request
     if (error.response?.status === 401) {
@@ -35,6 +43,12 @@ apiInstance.interceptors.response.use(
         window.location.href = '/login';
       }
     }
+    
+    // Handle network errors gracefully
+    if (!error.response) {
+      error.message = 'Network error - please check your connection and try again';
+    }
+    
     return Promise.reject(error);
   }
 );

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BrainJar Friend Request Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .container {
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        button {
+            background: #6366f1;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #4f46e5;
+        }
+        input {
+            padding: 8px;
+            border: 1px solid #444;
+            border-radius: 4px;
+            background: #333;
+            color: white;
+            margin: 5px;
+        }
+        .result {
+            background: #333;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            white-space: pre-wrap;
+        }
+        .success { border-left: 4px solid #10b981; }
+        .error { border-left: 4px solid #ef4444; }
+    </style>
+</head>
+<body>
+    <h1>🧪 BrainJar Friend Request Test</h1>
+    
+    <div class="container">
+        <h2>1. Create Test Users</h2>
+        <button onclick="createTestUsers()">Create Test Users</button>
+        <div id="createResult" class="result"></div>
+    </div>
+    
+    <div class="container">
+        <h2>2. Test Friend Request</h2>
+        <button onclick="testFriendRequest()">Send Friend Request</button>
+        <div id="friendResult" class="result"></div>
+    </div>
+    
+    <div class="container">
+        <h2>3. Test Get Users</h2>
+        <button onclick="testGetUsers()">Get All Users</button>
+        <div id="usersResult" class="result"></div>
+    </div>
+    
+    <div class="container">
+        <h2>4. Test Messaging</h2>
+        <button onclick="testMessaging()">Send Test Message</button>
+        <div id="messageResult" class="result"></div>
+    </div>
+
+    <script>
+        let testUsers = {};
+        
+        async function makeRequest(url, method = 'GET', body = null, token = null) {
+            const headers = {
+                'Content-Type': 'application/json',
+            };
+            
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+            
+            try {
+                const response = await fetch(url, {
+                    method,
+                    headers,
+                    body: body ? JSON.stringify(body) : null
+                });
+                
+                const data = await response.text();
+                let jsonData;
+                try {
+                    jsonData = JSON.parse(data);
+                } catch {
+                    jsonData = data;
+                }
+                
+                return {
+                    ok: response.ok,
+                    status: response.status,
+                    data: jsonData
+                };
+            } catch (error) {
+                return {
+                    ok: false,
+                    error: error.message
+                };
+            }
+        }
+        
+        async function createTestUsers() {
+            const result = document.getElementById('createResult');
+            result.textContent = 'Creating test users...';
+            
+            const user1 = {
+                username: `testuser1_${Math.floor(Math.random() * 10000)}`,
+                email: `test1_${Math.floor(Math.random() * 10000)}@example.com`,
+                password: 'password123'
+            };
+            
+            const user2 = {
+                username: `testuser2_${Math.floor(Math.random() * 10000)}`,
+                email: `test2_${Math.floor(Math.random() * 10000)}@example.com`,
+                password: 'password123'
+            };
+            
+            try {
+                // Create user 1
+                const signup1 = await makeRequest('http://localhost:8080/auth/signup', 'POST', user1);
+                if (!signup1.ok) {
+                    result.textContent = `Failed to create user 1: ${JSON.stringify(signup1)}`;
+                    result.className = 'result error';
+                    return;
+                }
+                
+                // Create user 2
+                const signup2 = await makeRequest('http://localhost:8080/auth/signup', 'POST', user2);
+                if (!signup2.ok) {
+                    result.textContent = `Failed to create user 2: ${JSON.stringify(signup2)}`;
+                    result.className = 'result error';
+                    return;
+                }
+                
+                // Login user 1
+                const login1 = await makeRequest('http://localhost:8080/auth/login', 'POST', {
+                    email: user1.email,
+                    password: user1.password
+                });
+                
+                if (!login1.ok) {
+                    result.textContent = `Failed to login user 1: ${JSON.stringify(login1)}`;
+                    result.className = 'result error';
+                    return;
+                }
+                
+                // Login user 2
+                const login2 = await makeRequest('http://localhost:8080/auth/login', 'POST', {
+                    email: user2.email,
+                    password: user2.password
+                });
+                
+                if (!login2.ok) {
+                    result.textContent = `Failed to login user 2: ${JSON.stringify(login2)}`;
+                    result.className = 'result error';
+                    return;
+                }
+                
+                testUsers = {
+                    user1: { ...user1, token: login1.data.token, id: login1.data.user.id },
+                    user2: { ...user2, token: login2.data.token, id: login2.data.user.id }
+                };
+                
+                result.textContent = `✅ Test users created successfully!\nUser 1: ${user1.username} (${testUsers.user1.id})\nUser 2: ${user2.username} (${testUsers.user2.id})`;
+                result.className = 'result success';
+                
+            } catch (error) {
+                result.textContent = `Error: ${error.message}`;
+                result.className = 'result error';
+            }
+        }
+        
+        async function testGetUsers() {
+            const result = document.getElementById('usersResult');
+            
+            if (!testUsers.user1) {
+                result.textContent = 'Please create test users first!';
+                result.className = 'result error';
+                return;
+            }
+            
+            result.textContent = 'Getting all users...';
+            
+            try {
+                const response = await makeRequest('http://localhost:8080/api/users/suggestions', 'GET', null, testUsers.user1.token);
+                
+                result.textContent = `Status: ${response.status}\nResponse: ${JSON.stringify(response.data, null, 2)}`;
+                result.className = response.ok ? 'result success' : 'result error';
+                
+            } catch (error) {
+                result.textContent = `Error: ${error.message}`;
+                result.className = 'result error';
+            }
+        }
+        
+        async function testFriendRequest() {
+            const result = document.getElementById('friendResult');
+            
+            if (!testUsers.user1 || !testUsers.user2) {
+                result.textContent = 'Please create test users first!';
+                result.className = 'result error';
+                return;
+            }
+            
+            result.textContent = 'Sending friend request...';
+            
+            try {
+                const response = await makeRequest('http://localhost:8080/api/friends/request', 'POST', {
+                    friend_id: testUsers.user2.id
+                }, testUsers.user1.token);
+                
+                result.textContent = `Status: ${response.status}\nResponse: ${JSON.stringify(response.data, null, 2)}`;
+                result.className = response.ok ? 'result success' : 'result error';
+                
+            } catch (error) {
+                result.textContent = `Error: ${error.message}`;
+                result.className = 'result error';
+            }
+        }
+        
+        async function testMessaging() {
+            const result = document.getElementById('messageResult');
+            
+            if (!testUsers.user1 || !testUsers.user2) {
+                result.textContent = 'Please create test users first!';
+                result.className = 'result error';
+                return;
+            }
+            
+            result.textContent = 'Sending test message...';
+            
+            try {
+                const response = await makeRequest('http://localhost:8080/api/chat', 'POST', {
+                    receiver_id: testUsers.user2.id,
+                    content: 'Hello! This is a test message from the friend request feature.'
+                }, testUsers.user1.token);
+                
+                result.textContent = `Status: ${response.status}\nResponse: ${JSON.stringify(response.data, null, 2)}`;
+                result.className = response.ok ? 'result success' : 'result error';
+                
+            } catch (error) {
+                result.textContent = `Error: ${error.message}`;
+                result.className = 'result error';
+            }
+        }
+    </script>
+</body>
+</html>

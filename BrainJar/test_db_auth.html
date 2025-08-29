@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BrainJar Database Authentication Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .response {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .success {
+            background: rgba(76, 175, 80, 0.2);
+            border: 1px solid #4CAF50;
+        }
+        .error {
+            background: rgba(244, 67, 54, 0.2);
+            border: 1px solid #f44336;
+        }
+        .info {
+            background: rgba(33, 150, 243, 0.2);
+            border: 1px solid #2196F3;
+        }
+        h1 {
+            text-align: center;
+            color: #fff;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        h2 {
+            color: #fff;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+            padding-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧠 BrainJar Database Authentication Test</h1>
+    
+    <div class="container">
+        <h2>📝 User Registration (Database Storage)</h2>
+        <div class="form-group">
+            <label for="signupUsername">Username:</label>
+            <input type="text" id="signupUsername" value="testuser" placeholder="Enter username">
+        </div>
+        <div class="form-group">
+            <label for="signupEmail">Email:</label>
+            <input type="email" id="signupEmail" value="test@example.com" placeholder="Enter email">
+        </div>
+        <div class="form-group">
+            <label for="signupPassword">Password:</label>
+            <input type="password" id="signupPassword" value="password123" placeholder="Enter password">
+        </div>
+        <button onclick="testSignup()">🚀 Register User (Store in DB)</button>
+        <button onclick="clearSignupInputs()">🗑️ Clear</button>
+    </div>
+
+    <div class="container">
+        <h2>🔐 User Login (Database Verification)</h2>
+        <div class="form-group">
+            <label for="loginEmail">Email:</label>
+            <input type="email" id="loginEmail" value="test@example.com" placeholder="Enter email">
+        </div>
+        <div class="form-group">
+            <label for="loginPassword">Password:</label>
+            <input type="password" id="loginPassword" value="password123" placeholder="Enter password">
+        </div>
+        <button onclick="testLogin()">🔑 Login (Verify from DB)</button>
+        <button onclick="clearLoginInputs()">🗑️ Clear</button>
+    </div>
+
+    <div class="container">
+        <h2>🔍 Quick Tests</h2>
+        <button onclick="testDuplicateUser()">⚠️ Test Duplicate User</button>
+        <button onclick="testInvalidLogin()">❌ Test Invalid Login</button>
+        <button onclick="testRandomUser()">🎲 Test Random User</button>
+        <button onclick="clearResponse()">🗑️ Clear Response</button>
+    </div>
+
+    <div id="response"></div>
+
+    <script>
+        const API_BASE = 'http://localhost:8080';
+        
+        function displayResponse(title, data, isError = false) {
+            const responseDiv = document.getElementById('response');
+            const className = isError ? 'error' : 'success';
+            responseDiv.innerHTML = `
+                <div class="response ${className}">
+                    <strong>${title}</strong>
+                    ${JSON.stringify(data, null, 2)}
+                </div>
+            `;
+        }
+
+        function displayInfo(title, message) {
+            const responseDiv = document.getElementById('response');
+            responseDiv.innerHTML = `
+                <div class="response info">
+                    <strong>${title}</strong>
+                    ${message}
+                </div>
+            `;
+        }
+
+        async function testSignup() {
+            const username = document.getElementById('signupUsername').value;
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+
+            if (!username || !email || !password) {
+                displayResponse('❌ Error', 'Please fill in all fields', true);
+                return;
+            }
+
+            try {
+                displayInfo('🔄 Processing...', 'Creating user account in database...');
+                
+                const response = await fetch(`${API_BASE}/auth/signup`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, email, password }),
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    displayResponse('✅ Signup Successful - User Stored in Database!', {
+                        message: 'User has been successfully created and stored in PostgreSQL database',
+                        user_id: data.id,
+                        username: data.username,
+                        email: data.email,
+                        created_at: data.created_at,
+                        note: 'Password is securely hashed in database'
+                    });
+                    
+                    // Auto-fill login form
+                    document.getElementById('loginEmail').value = email;
+                    document.getElementById('loginPassword').value = password;
+                } else {
+                    displayResponse('❌ Signup Failed', data, true);
+                }
+            } catch (error) {
+                displayResponse('❌ Network Error', { error: error.message }, true);
+            }
+        }
+
+        async function testLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            if (!email || !password) {
+                displayResponse('❌ Error', 'Please fill in email and password', true);
+                return;
+            }
+
+            try {
+                displayInfo('🔄 Processing...', 'Verifying credentials against database...');
+                
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password }),
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    displayResponse('✅ Login Successful - Database Verification Complete!', {
+                        message: 'User credentials verified from PostgreSQL database',
+                        token: data.token ? `${data.token.substring(0, 50)}...` : 'No token',
+                        token_length: data.token ? data.token.length : 0,
+                        user: {
+                            id: data.user.id,
+                            username: data.user.username,
+                            email: data.user.email,
+                            created_at: data.user.created_at
+                        },
+                        note: 'JWT token generated for authenticated session'
+                    });
+                } else {
+                    displayResponse('❌ Login Failed', data, true);
+                }
+            } catch (error) {
+                displayResponse('❌ Network Error', { error: error.message }, true);
+            }
+        }
+
+        async function testDuplicateUser() {
+            const username = document.getElementById('signupUsername').value || 'testuser';
+            const email = document.getElementById('signupEmail').value || 'test@example.com';
+
+            try {
+                displayInfo('🔄 Testing...', 'Attempting to create duplicate user...');
+                
+                const response = await fetch(`${API_BASE}/auth/signup`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, email, password: 'password123' }),
+                });
+
+                const data = await response.json();
+                
+                if (!response.ok && response.status === 409) {
+                    displayResponse('✅ Duplicate Prevention Working!', {
+                        message: 'Database correctly prevented duplicate user creation',
+                        status: response.status,
+                        error: data
+                    });
+                } else {
+                    displayResponse('⚠️ Unexpected Result', data, true);
+                }
+            } catch (error) {
+                displayResponse('❌ Network Error', { error: error.message }, true);
+            }
+        }
+
+        async function testInvalidLogin() {
+            try {
+                displayInfo('🔄 Testing...', 'Testing login with invalid credentials...');
+                
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email: 'invalid@example.com', password: 'wrongpassword' }),
+                });
+
+                const data = await response.json();
+                
+                if (!response.ok && response.status === 401) {
+                    displayResponse('✅ Security Working!', {
+                        message: 'Database correctly rejected invalid credentials',
+                        status: response.status,
+                        error: data
+                    });
+                } else {
+                    displayResponse('⚠️ Unexpected Result', data, true);
+                }
+            } catch (error) {
+                displayResponse('❌ Network Error', { error: error.message }, true);
+            }
+        }
+
+        async function testRandomUser() {
+            const random = Math.floor(Math.random() * 10000);
+            const username = `dbtest${random}`;
+            const email = `dbtest${random}@example.com`;
+            
+            document.getElementById('signupUsername').value = username;
+            document.getElementById('signupEmail').value = email;
+            document.getElementById('signupPassword').value = 'password123';
+            
+            await testSignup();
+        }
+
+        function clearSignupInputs() {
+            document.getElementById('signupUsername').value = '';
+            document.getElementById('signupEmail').value = '';
+            document.getElementById('signupPassword').value = '';
+        }
+
+        function clearLoginInputs() {
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginPassword').value = '';
+        }
+
+        function clearResponse() {
+            document.getElementById('response').innerHTML = '';
+        }
+
+        // Display initial info
+        displayInfo('🚀 Ready to Test', 'Backend server running on http://localhost:8080 with PostgreSQL database integration. Click buttons above to test database authentication.');
+    </script>
+</body>
+</html>

@@ -17,15 +17,23 @@ pub struct Problem {
     pub solved: Option<bool>,
 }
 
+// Simplified response struct for API responses
+#[derive(Debug, Serialize)]
+pub struct ProblemResponse {
+    pub id: Uuid,
+    pub title: String,
+    pub description: String,
+    pub category: String,
+    pub user_id: Uuid,
+    pub solved: bool,
+    pub created_at: DateTime<Utc>,
+}
+
 #[derive(Debug, Deserialize)]
 pub struct CreateProblem {
     pub title: String,
     pub description: String,
     pub category: String,
-    pub documentation_links: Option<Vec<String>>,
-    pub video_references: Option<Vec<String>>,
-    pub difficulty_level: Option<String>,
-    pub tags: Option<Vec<String>>,
 }
 
 #[derive(Debug, Deserialize)]

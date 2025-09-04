@@ -4,10 +4,9 @@ use uuid::Uuid;
 
 use crate::middleware::AuthenticatedUser;
 use crate::models::message::{
-    Message, SendMessageRequest, MarkAsReadRequest, ConversationWithDetails, 
-    ConversationHistoryResponse, MessageWithSender, MessageType
+    Message, SendMessageRequest, MarkAsReadRequest,
+    ConversationHistoryResponse, MessageWithSender,
 };
-use crate::models::user::PublicUserProfile;
 
 pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.service(
@@ -66,15 +65,14 @@ async fn send_message(
 
     // Create the message
     let message = sqlx::query_as::<_, Message>(
-        "INSERT INTO messages (id, sender_id, receiver_id, message, message_type)
-         VALUES ($1, $2, $3, $4, $5)
+        "INSERT INTO messages (id, sender_id, receiver_id, message)
+         VALUES ($1, $2, $3, $4)
          RETURNING *"
     )
     .bind(Uuid::new_v4())
     .bind(user.id)
     .bind(payload.receiver_id)
     .bind(&payload.message)
-    .bind(payload.message_type.unwrap_or(MessageType::Text))
     .fetch_one(&**pool)
     .await
     .map_err(|e| actix_web::error::ErrorInternalServerError(e.to_string()))?;

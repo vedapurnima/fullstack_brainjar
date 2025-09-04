@@ -2,7 +2,7 @@ use actix_web::{web, HttpResponse, Error};
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::models::friend::{Friend, CreateFriendRequest, UpdateFriendRequest, FriendStatus};
+use crate::models::friend::{Friend, FriendRequest, SendFriendRequestDto, RespondToRequestDto, RequestStatus, FriendWithDetails, FriendRequestWithDetails};
 use crate::middleware::AuthenticatedUser;
 
 pub fn config(cfg: &mut web::ServiceConfig) {

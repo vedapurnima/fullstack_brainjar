@@ -83,8 +83,7 @@ CREATE TABLE IF NOT EXISTS user_achievements (
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     achievement_type VARCHAR(50) NOT NULL,
     achievement_data JSONB,
-    earned_at TIMESTAMP DEFAULT NOW(),
-    INDEX(user_id, achievement_type)
+    earned_at TIMESTAMP DEFAULT NOW()
 );
 
 -- Indexes for better performance
@@ -95,6 +94,7 @@ CREATE INDEX IF NOT EXISTS idx_problem_feedback_problem ON problem_feedback(prob
 CREATE INDEX IF NOT EXISTS idx_problem_feedback_user ON problem_feedback(user_id);
 CREATE INDEX IF NOT EXISTS idx_problem_resources_problem ON problem_resources(problem_id);
 CREATE INDEX IF NOT EXISTS idx_users_last_activity ON users(last_activity);
+CREATE INDEX IF NOT EXISTS idx_user_achievements_user_type ON user_achievements(user_id, achievement_type);
 
 -- Insert default problem categories
 INSERT INTO problem_categories (name, description, icon, color) VALUES

@@ -10,8 +10,8 @@ use crate::middleware::{Claims, AuthenticatedUser};
 
 pub fn config(cfg: &mut ServiceConfig) {
     cfg.service(
-        web::scope("/auth")
-            .route("/signup", web::post().to(signup))
+        web::scope("/api/auth")
+            .route("/register", web::post().to(signup))
             .route("/login", web::post().to(login))
     )
     .service(
@@ -130,7 +130,7 @@ async fn login(
     };
 
     let jwt_secret = std::env::var("JWT_SECRET")
-        .unwrap_or_else(|_| "default_secret_key".to_string());
+        .unwrap_or_else(|_| "brainjar_secret_key_2025".to_string());
 
     let token = encode(
         &Header::default(),

@@ -18,10 +18,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("Connected successfully!");
 
-    // Read and execute the enhanced schema migration
-    let migration_sql = fs::read_to_string("migrations/20250825000001_enhanced_schema.sql")?;
+    // Read and execute the messages migration
+    let migration_sql = fs::read_to_string("migrations/20250830000001_messages.sql")?;
     
-    println!("Applying enhanced schema migration...");
+    println!("Applying messages migration...");
     
     // Split the SQL by statements and execute each one
     let statements: Vec<&str> = migration_sql.split(';').collect();

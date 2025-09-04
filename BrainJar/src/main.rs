@@ -12,6 +12,12 @@ async fn main() -> std::io::Result<()> {
     // Load environment variables
     dotenv().ok();
 
+    // Set default JWT_SECRET if not provided
+    if std::env::var("JWT_SECRET").is_err() {
+        std::env::set_var("JWT_SECRET", "brainjar_secret_key_2025");
+        println!("Using default JWT_SECRET");
+    }
+
     // Initialize logging
     tracing_subscriber::fmt::init();
 

@@ -4,9 +4,9 @@ pub mod auth;
 pub mod problems;
 pub mod streaks;
 pub mod characters;
-pub mod friends;
+pub mod friends_simple;
 pub mod chat;
-// pub mod messages; // Disabled until database is updated
+pub mod messages_simple;
 // pub mod enhanced_problems; // Disabled until database is updated
 
 async fn health_check() -> HttpResponse {
@@ -20,7 +20,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
         // .configure(enhanced_problems::config) // Disabled until database is updated
         .configure(streaks::config)
         .configure(characters::config)
-        .configure(friends::config)
-        .configure(chat::config);
-        // .configure(messages::config); // Disabled until database is updated
+        .configure(friends_simple::configure_friends_routes)
+        .configure(chat::config)
+                .configure(messages_simple::configure_messages_routes);
 }

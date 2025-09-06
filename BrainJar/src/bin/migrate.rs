@@ -18,10 +18,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("Connected successfully!");
 
-    // Read and execute the messages migration
-    let migration_sql = fs::read_to_string("migrations/20250830000001_messages.sql")?;
+    // Read and execute the friends schema fix migration
+    let migration_sql = fs::read_to_string("migrations/20250904000001_fix_friends_schema.sql")?;
     
-    println!("Applying messages migration...");
+    println!("Applying friends schema fix migration...");
     
     // Split the SQL by statements and execute each one
     let statements: Vec<&str> = migration_sql.split(';').collect();

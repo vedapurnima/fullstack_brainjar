@@ -14,7 +14,9 @@ async fn main() -> std::io::Result<()> {
 
     // Set default JWT_SECRET if not provided
     if std::env::var("JWT_SECRET").is_err() {
-        std::env::set_var("JWT_SECRET", "brainjar_secret_key_2025");
+        unsafe {
+            std::env::set_var("JWT_SECRET", "brainjar_secret_key_2025");
+        }
         println!("Using default JWT_SECRET");
     }
 
